@@ -1,9 +1,12 @@
 package com.example.numbercompositiontraining.presentation
 
+import android.content.res.ColorStateList
 import android.os.Bundle
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
+import android.widget.TextView
+import androidx.core.content.ContextCompat
 import androidx.fragment.app.Fragment
 import androidx.lifecycle.ViewModelProvider
 import com.example.numbercompositiontraining.R
@@ -16,7 +19,13 @@ import com.example.numbercompositiontraining.domain.entity.Question
 class GameFragment : Fragment() {
 
     private lateinit var level: Level
-    private lateinit var viewModel: GameViewModel
+    private val viewModel: GameViewModel by lazy {
+        ViewModelProvider(
+            this,
+            ViewModelProvider.AndroidViewModelFactory.getInstance
+                (requireActivity().application)
+        )[GameViewModel::class.java]
+    }
     private lateinit var gameSettings: GameSettings
     private lateinit var question: Question
     private var _binding: FragmentGameBinding? = null
@@ -40,24 +49,8 @@ class GameFragment : Fragment() {
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
-        viewModel = ViewModelProvider(this)[GameViewModel::class.java]
         observeViewModel()
         viewModel.startGame(level)
-//        binding.tvSum.setOnClickListener {
-//            launchGameFinishFragment(
-//                GameResult(
-//                    false,
-//                    10,
-//                    18,
-//                    GameSettings(
-//                        1,
-//                        3,
-//                        4,
-//                        5
-//                    )
-//                )
-//            )
-//        }
     }
 
     override fun onDestroyView() {
@@ -68,6 +61,17 @@ class GameFragment : Fragment() {
     private fun parseArgs() {
         requireArguments().getParcelable<Level>(KEY_LEVEL)?.let {
             level = it
+        }
+    }
+
+    private val tvOptions by lazy {
+        mutableListOf<TextView>().apply {
+            add(binding.tvOption1)
+            add(binding.tvOption2)
+            add(binding.tvOption3)
+            add(binding.tvOption4)
+            add(binding.tvOption5)
+            add(binding.tvOption6)
         }
     }
 
@@ -84,8 +88,51 @@ class GameFragment : Fragment() {
         }
 
         viewModel.question.observe(viewLifecycleOwner) {
-            binding.tvSum.text = it.visibleNumber.toString()
+            binding.tvSum.text = it.sum.toString()
+            binding.tvVisibleNumber.text = it.visibleNumber.toString()
+            for (i in 0 until tvOptions.size) {
+                tvOptions[i].text = it.options[i].toString()
+                tvOptions[i].setOnClickListener() {
+                    val answer = tvOptions[i].text.toString()
+                    viewModel.chooseAnswers(answer.toInt())
+                }
+            }
+        }
 
+        viewModel.progressAnswers.observe(viewLifecycleOwner) {
+            binding.tvAnswersProgress.text = it
+        }
+
+        viewModel.minPercent.observe(viewLifecycleOwner) {
+            binding.progressBar.secondaryProgress = it
+        }
+
+        viewModel.percentOfRightAnswers.observe(viewLifecycleOwner) {
+            binding.progressBar.setProgress(it, true)
+        }
+
+        viewModel.enoughCountOfRightAnswers.observe(viewLifecycleOwner) {
+            binding.tvAnswersProgress.setTextColor(getColorByState(it))
+        }
+        viewModel.enoughPercentOfRightAnswers.observe(viewLifecycleOwner) {
+            binding.progressBar.progressTintList = ColorStateList.valueOf(getColorByState(it))
+        }
+        viewModel.gameResult.observe(viewLifecycleOwner) {
+            launchGameFinishFragment(it)
+        }
+    }
+
+    private fun getColorByState(state: Boolean): Int {
+        return if (state) {
+            ContextCompat.getColor(
+                requireContext(), android.R.color
+                    .holo_green_light
+            )
+        } else {
+            ContextCompat.getColor(
+                requireContext(), android.R.color
+                    .holo_red_light
+            )
         }
     }
 
