@@ -19,13 +19,25 @@ import com.example.numbercompositiontraining.domain.entity.Question
 class GameFragment : Fragment() {
 
     private lateinit var level: Level
-    private val viewModel: GameViewModel by lazy {
-        ViewModelProvider(
-            this,
-            ViewModelProvider.AndroidViewModelFactory.getInstance
-                (requireActivity().application)
-        )[GameViewModel::class.java]
+    private val viewModelFactory by lazy {
+        GameViewModelFactory(level, requireActivity().application)
     }
+
+    private val viewModel by lazy {
+        ViewModelProvider(this, viewModelFactory)[GameViewModel::class.java]
+    }
+
+    private val tvOptions by lazy {
+        mutableListOf<TextView>().apply {
+            add(binding.tvOption1)
+            add(binding.tvOption2)
+            add(binding.tvOption3)
+            add(binding.tvOption4)
+            add(binding.tvOption5)
+            add(binding.tvOption6)
+        }
+    }
+
     private lateinit var gameSettings: GameSettings
     private lateinit var question: Question
     private var _binding: FragmentGameBinding? = null
@@ -50,7 +62,6 @@ class GameFragment : Fragment() {
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
         observeViewModel()
-        viewModel.startGame(level)
     }
 
     override fun onDestroyView() {
@@ -61,17 +72,6 @@ class GameFragment : Fragment() {
     private fun parseArgs() {
         requireArguments().getParcelable<Level>(KEY_LEVEL)?.let {
             level = it
-        }
-    }
-
-    private val tvOptions by lazy {
-        mutableListOf<TextView>().apply {
-            add(binding.tvOption1)
-            add(binding.tvOption2)
-            add(binding.tvOption3)
-            add(binding.tvOption4)
-            add(binding.tvOption5)
-            add(binding.tvOption6)
         }
     }
 

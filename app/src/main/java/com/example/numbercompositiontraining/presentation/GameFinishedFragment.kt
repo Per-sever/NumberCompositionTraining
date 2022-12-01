@@ -7,6 +7,7 @@ import android.view.ViewGroup
 import androidx.activity.OnBackPressedCallback
 import androidx.fragment.app.Fragment
 import androidx.fragment.app.FragmentManager
+import com.example.numbercompositiontraining.R
 import com.example.numbercompositiontraining.databinding.FragmentGameFinishedBinding
 import com.example.numbercompositiontraining.domain.entity.GameResult
 
@@ -43,9 +44,54 @@ class GameFinishedFragment : Fragment() {
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
-        val callback = object :
-            OnBackPressedCallback
-                (true) {
+        setupClickListener()
+        bindViews()
+    }
+
+    private fun bindViews() {
+        with(binding) {
+            binding.ivResultSmile.setBackgroundResource(getSmileId())
+            tvRequiredAnswers.text = String.format(
+                requireActivity().resources.getString(
+                    R.string.required_percents
+                ), gameResult.gameSettings.minPercentOfRightAnswers
+            )
+            tvYourScore.text = String.format(
+                requireActivity().resources.getString(
+                    R.string.your_score
+                ), gameResult.countOfRightAnswers
+            )
+            tvRequiredPercentage.text = String.format(
+                requireActivity().resources.getString(
+                    R.string.required_answers
+                ), gameResult.gameSettings.minCountOfRightAnswers
+            )
+            tvScorePercentage.text = String.format(
+                requireActivity().resources.getString(
+                    R.string.score_percentage
+                ), getPercentOfRightAnswers()
+            )
+        }
+    }
+
+    private fun getSmileId(): Int {
+        return if (gameResult.winner) {
+            R.drawable.ic_smile
+        } else {
+            R.drawable.ic_sad_smile
+        }
+    }
+
+    private fun getPercentOfRightAnswers() = with(gameResult) {
+        if (countOfQuestions == 0) {
+            0
+        } else {
+            (countOfRightAnswers / countOfQuestions.toDouble() * 100).toInt()
+        }
+    }
+
+    private fun setupClickListener() {
+        val callback = object : OnBackPressedCallback(true) {
             override fun handleOnBackPressed() {
                 retryGame()
             }
