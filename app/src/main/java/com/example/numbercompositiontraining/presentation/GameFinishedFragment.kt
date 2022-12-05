@@ -42,50 +42,7 @@ class GameFinishedFragment : Fragment() {
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
         setupClickListener()
-        bindViews()
-    }
-
-    private fun bindViews() {
         binding.gameResult = args.gameResult
-        with(binding) {
-            binding.ivResultSmile.setBackgroundResource(getSmileId())
-//            tvRequiredAnswers.text = String.format(
-//                requireActivity().resources.getString(
-//                    R.string.required_percents
-//                ), args.gameResult.gameSettings.minPercentOfRightAnswers
-//            )
-//            tvYourScore.text = String.format(
-//                requireActivity().resources.getString(
-//                    R.string.your_score
-//                ), args.gameResult.countOfRightAnswers
-//            )
-//            tvRequiredPercentage.text = String.format(
-//                requireActivity().resources.getString(
-//                    R.string.required_answers
-//                ), args.gameResult.gameSettings.minCountOfRightAnswers
-//            )
-            tvScorePercentage.text = String.format(
-                requireActivity().resources.getString(
-                    R.string.score_percentage
-                ), getPercentOfRightAnswers()
-            )
-        }
-    }
-
-    private fun getSmileId(): Int {
-        return if (args.gameResult.winner) {
-            R.drawable.ic_smile
-        } else {
-            R.drawable.ic_sad_smile
-        }
-    }
-
-    private fun getPercentOfRightAnswers() = with(args.gameResult) {
-        if (countOfQuestions == 0) {
-            0
-        } else {
-            (countOfRightAnswers / countOfQuestions.toDouble() * 100).toInt()
-        }
     }
 
     private fun setupClickListener() {
@@ -98,6 +55,5 @@ class GameFinishedFragment : Fragment() {
         super.onDestroyView()
         _binding = null
     }
-
 
 }
